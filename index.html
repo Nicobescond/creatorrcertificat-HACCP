@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Certificat HACCP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .form-section h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .certificate-preview {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .certificate {
+            width: 100%;
+            min-height: 600px;
+            padding: 40px;
+            background: white;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+
+        .cert-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .ecocert-logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .ecocert-logo::after {
+            content: "🌿";
+            position: absolute;
+            right: -30px;
+            top: -5px;
+            color: #4CAF50;
+            font-size: 0.8em;
+        }
+
+        .cert-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .cert-content {
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .company-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        .cert-details {
+            margin: 20px 0;
+            text-align: left;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .cert-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .signature-section {
+            text-align: right;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .btn-download {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-download:hover {
+            background: #0b7dda;
+            transform: translateY(-1px);
+        }
+
+        .info-icon {
+            width: 20px;
+            height: 20px;
+            background: #4CAF50;
+            border-radius: 50%;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .calculated-dates {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .cert-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Générateur de Certificat HACCP</h1>
+            <p>Conforme aux standards Ecocert Environnement</p>
+        </div>
+
+        <div class="content">
+            <div class="form-section">
+                <h2><span class="info-icon">📋</span>Informations de l'entreprise</h2>
+                
+                <div class="form-group">
+                    <label for="companyName">Nom de l'entreprise *</label>
+                    <input type="text" id="companyName" placeholder="ex: JUICING EXPERTS SAC" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Adresse complète *</label>
+                    <textarea id="address" placeholder="Centre industriel, adresse, ville, pays" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="auditScope">Périmètre d'audit *</label>
+                    <textarea id="auditScope" placeholder="Description détaillée des produits et processus" required></textarea>
+                </div>
+
+                <h2><span class="info-icon">📅</span>Dates et certification</h2>
+
+                <div class="form-group">
+                    <label for="auditDate">Date d'audit initial *</label>
+                    <input type="date" id="auditDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="issueDate">Date d'émission du certificat *</label>
+                    <input type="date" id="issueDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="certificateNumber">Numéro de certificat *</label>
+                    <input type="text" id="certificateNumber" placeholder="ex: 25HACCP001" required>
+                </div>
+
+                <div class="calculated-dates">
+                    <h3>📊 Dates calculées automatiquement :</h3>
+                    <p><strong>Date d'expiration :</strong> <span id="calculatedExpiry">-</span></p>
+                    <p><strong>Période audit de recertification :</strong> <span id="calculatedAuditWindow">-</span></p>
+                </div>
+
+                <button class="btn-generate" onclick="generateCertificate()">
+                    ✨ Générer le certificat
+                </button>
+            </div>
+
+            <div class="certificate-preview">
+                <div class="certificate" id="certificate">
+                    <div class="cert-header">
+                        <div style="font-size: 0.8em; color: #666; text-align: left;">F-HACCP-04</div>
+                        <div style="font-size: 0.7em; color: #666; margin: 10px 0; line-height: 1.4;">
+                            ECOCERT Environnement SAS – Capital 37.000 € – 36 Boulevard de la Bastille, 75012 Paris<br>
+                            SIREN 409 982 709 RCS PARIS - Tél. +33 (0)1 53 44 74 44– www.ecocert.com
+                        </div>
+                        
+                        <div class="ecocert-logo">
+                            ENVIRONNEMENT<br>
+                            <span style="font-size: 1.2em;">ECOCERT</span>
+                        </div>
+                        
+                        <div class="cert-title">CERTIFICATE OF CONFORMITY<br>HACCP</div>
+                    </div>
+
+                    <div class="cert-content">
+                        <p>By this letter, Ecocert Environnement SAS, as a Control Body, certifies that:</p>
+                        
+                        <div class="company-name" id="certCompanyName">
+                            [Nom de l'entreprise]
+                        </div>
+                        
+                        <div id="certAddress" style="margin: 15px 0; line-height: 1.4;">
+                            [Adresse de l'entreprise]
+                        </div>
+
+                        <div class="cert-details">
+                            <strong>For the audit scope:</strong><br><br>
+                            <div id="certScope">[Périmètre d'audit]</div>
+                        </div>
+
+                        <p style="margin: 20px 0; text-align: justify;">
+                            Comply with the recommendations described in the Codex Alimentarius GENERAL PRINCIPLES 
+                            OF FOOD HYGIENE Guide, No. CAC/RCP 1-1969, Rev. 6 (2022) according to the program 
+                            requirements defined by Ecocert in the F-HACCP-01 audit checklist and the C-HACCP-01 audit 
+                            process.
+                        </p>
+
+                        <div class="cert-info">
+                            <div><strong>Certificate No.:</strong> <span id="certNumber">[Numéro]</span></div>
+                            <div><strong>Audit Date:</strong> <span id="certAuditDate">[Date audit]</span></div>
+                            <div><strong>Date of issue:</strong> <span id="certIssueDate">[Date émission]</span></div>
+                            <div><strong>End date of validity:</strong> <span id="certExpiryDate">[Date expiration]</span></div>
+                            <div style="grid-column: 1/-1;"><strong>Next audit period:</strong> <span id="certAuditPeriod">[Période audit]</span></div>
+                        </div>
+
+                        <div class="signature-section">
+                            <div style="margin-top: 30px;">
+                                <div style="border-bottom: 1px solid #333; width: 200px; margin-left: auto;"></div>
+                                <div style="margin-top: 10px;">
+                                    <strong>Nicolas BESCOND</strong><br>
+                                    Head of Department<br>
+                                    Food Quality and Safety
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="font-size: 0.7em; color: #666; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 15px;">
+                            This document is the property of Ecocert Environnement SAS. It must be returned on request. Only the signed original is valid.<br><br>
+                            ECOCERT Environnement SAS – Capital 37.000 € – 36 Boulevard de la Bastille, 75012 Paris<br>
+                            SIREN 409 982 709 RCS PARIS - Tél. +33 (0)1 53 44 74 44– www.ecocert.com
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn-download" onclick="downloadCertificate()">
+                    📥 Télécharger en PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatDate(date, locale = 'fr-FR') {
+            return date.toLocaleDateString(locale, {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function formatDateUS(date) {
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function calculateDates() {
+            const auditDateInput = document.getElementById('auditDate').value;
+            if (!auditDateInput) return;
+
+            const auditDate = new Date(auditDateInput);
+            
+            // Calcul de la date d'expiration selon la règle IFS Food
+            // Date du dernier jour de l'audit initial + 1 an + 8 semaines – 1 jour
+            const expiryDate = new Date(auditDate);
+            expiryDate.setFullYear(expiryDate.getFullYear() + 1); // +1 an
+            expiryDate.setDate(expiryDate.getDate() + (8 * 7) - 1); // +8 semaines -1 jour
+
+            // Calcul de la fenêtre d'audit de recertification
+            // 8 semaines avant à 2 semaines après la date d'audit anniversaire
+            const auditAnniversary = new Date(auditDate);
+            auditAnniversary.setFullYear(auditAnniversary.getFullYear() + 1);
+            
+            const auditWindowStart = new Date(auditAnniversary);
+            auditWindowStart.setDate(auditWindowStart.getDate() - (8 * 7)); // -8 semaines
+            
+            const auditWindowEnd = new Date(auditAnniversary);
+            auditWindowEnd.setDate(auditWindowEnd.getDate() + (2 * 7)); // +2 semaines
+
+            // Mise à jour de l'affichage
+            document.getElementById('calculatedExpiry').textContent = formatDate(expiryDate);
+            document.getElementById('calculatedAuditWindow').textContent = 
+                `${formatDate(auditWindowStart)} – ${formatDate(auditWindowEnd)}`;
+
+            return { expiryDate, auditWindowStart, auditWindowEnd };
+        }
+
+        function generateCertificate() {
+            // Récupération des données du formulaire
+            const companyName = document.getElementById('companyName').value;
+            const address = document.getElementById('address').value;
+            const auditScope = document.getElementById('auditScope').value;
+            const auditDate = document.getElementById('auditDate').value;
+            const issueDate = document.getElementById('issueDate').value;
+            const certificateNumber = document.getElementById('certificateNumber').value;
+
+            // Vérification des champs obligatoires
+            if (!companyName || !address || !auditScope || !auditDate || !issueDate || !certificateNumber) {
+                alert('Veuillez remplir tous les champs obligatoires (marqués d\'un *)');
+                return;
+            }
+
+            // Calcul des dates
+            const dates = calculateDates();
+            if (!dates) {
+                alert('Erreur dans le calcul des dates');
+                return;
+            }
+
+            // Mise à jour du certificat
+            document.getElementById('certCompanyName').textContent = companyName;
+            document.getElementById('certAddress').innerHTML = address.replace(/\n/g, '<br>');
+            document.getElementById('certScope').innerHTML = auditScope.replace(/\n/g, '<br>');
+            document.getElementById('certNumber').textContent = certificateNumber;
+            document.getElementById('certAuditDate').textContent = formatDateUS(new Date(auditDate));
+            document.getElementById('certIssueDate').textContent = formatDateUS(new Date(issueDate));
+            document.getElementById('certExpiryDate').textContent = formatDateUS(dates.expiryDate);
+            document.getElementById('certAuditPeriod').textContent = 
+                `${formatDateUS(dates.auditWindowStart)} – ${formatDateUS(dates.auditWindowEnd)}`;
+
+            // Animation de succès
+            const certificate = document.getElementById('certificate');
+            certificate.style.transform = 'scale(1.02)';
+            certificate.style.transition = 'transform 0.3s ease';
+            setTimeout(() => {
+                certificate.style.transform = 'scale(1)';
+            }, 300);
+        }
+
+        function downloadCertificate() {
+            const certificate = document.getElementById('certificate');
+            
+            // Pour une version basique sans bibliothèques externes
+            window.print();
+        }
+
+        // Événements pour le calcul automatique des dates
+        document.getElementById('auditDate').addEventListener('change', calculateDates);
+
+        // Auto-remplissage de la date d'émission avec la date du jour
+        document.getElementById('issueDate').valueAsDate = new Date();
+        
+        // Exemple de données pré-remplies pour la démonstration
+        document.getElementById('companyName').value = 'JUICING EXPERTS SAC';
+        document.getElementById('address').value = 'CENTRO INDUSTRIAL\nLAS PRADERAS DE LURIN\nMZ A LT 14-LURIN\nLIMA-PERÚ';
+        document.getElementById('auditScope').value = 'Pasteurized and frozen juices of ginger, turmeric, pineapple,\nlemon & passion fruit and by-products (starch and sediments of ginger and\nturmeric)\npacked in bulk and in polythene bags and in buckets or cylinders';
+        document.getElementById('auditDate').value = '2025-01-21';
+        document.getElementById('certificateNumber').value = '25HACCP001';
+
+        // Calcul initial des dates
+        calculateDates();
+    </script>
+</body>
+</html>
